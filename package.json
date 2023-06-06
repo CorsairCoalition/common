@@ -16,6 +16,9 @@
     "type": "git",
     "url": "github:CorsairCoalition/common"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "typescript"
   ],
