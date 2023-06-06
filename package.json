@@ -1,6 +1,6 @@
 {
   "name": "@corsaircoalition/common",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "common helper modules for a modular generals.io bot framework",
   "main": "out/index.js",
   "type": "module",
