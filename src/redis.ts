@@ -17,7 +17,7 @@ export default class Redis {
 			password: process.env['REDIS_PASSWORD'] || redisConfig.PASSWORD,
 			socket: {
 				host: process.env['REDIS_HOST'] || redisConfig.HOST,
-				port: redisConfig.PORT,
+				port: parseInt(process.env['REDIS_PORT']) || redisConfig.PORT,
 				tls: redisConfig.TLS,
 				servername: process.env['REDIS_HOST'] || redisConfig.HOST,
 			}
