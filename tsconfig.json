@@ -1,5 +1,5 @@
 {
-    "extends": "@sindresorhus/tsconfig",
+	"extends": "@sindresorhus/tsconfig",
 	"compilerOptions": {
 		"module": "ES2022",
 		"target": "ES2022",
@@ -8,7 +8,10 @@
 		"sourceMap": true,
 		"outDir": "out"
 	},
-	"include": ["src/**/*"],
+	"include": [
+		"src/**/*",
+		"src/types.d.ts"
+	],
 	"exclude": [
 		"node_modules",
 		"**/*.spec.ts"

@@ -1,11 +1,12 @@
 {
   "name": "@corsaircoalition/common",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "common helper modules for a modular generals.io bot framework",
   "main": "out/index.js",
   "type": "module",
   "files": [
-    "out"
+    "out",
+    "src/**/*.d.ts"
   ],
   "scripts": {
     "build": "tsc --build",
@@ -24,9 +25,6 @@
   ],
   "author": "Sonny Bhatia <aadityabhatia@gmail.com>",
   "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/CorsairCoalition/common/issues"
-  },
   "homepage": "https://github.com/CorsairCoalition/docs#readme",
   "devDependencies": {
     "@sindresorhus/tsconfig": "^3.0.1",
