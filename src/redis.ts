@@ -12,14 +12,30 @@ export default class Redis {
 	public static async initilize(redisConfig: Config.Redis) {
 		Redis.EXPIRATION_TIME = redisConfig.EXPIRATION_TIME
 
+		if (process.env['REDIS_USERNAME'] !== undefined) {
+			redisConfig.USERNAME = process.env['REDIS_USERNAME']
+		}
+		if (process.env['REDIS_PASSWORD'] !== undefined) {
+			redisConfig.PASSWORD = process.env['REDIS_PASSWORD']
+		}
+		if (process.env['REDIS_HOST'] !== undefined) {
+			redisConfig.HOST = process.env['REDIS_HOST']
+		}
+		if (process.env['REDIS_PORT'] !== undefined) {
+			redisConfig.PORT = parseInt(process.env['REDIS_PORT'])
+		}
+		if (process.env['REDIS_TLS'] !== undefined) {
+			redisConfig.TLS = process.env['REDIS_TLS'] === "1" || process.env['REDIS_TLS'] === "true"
+		}
+
 		const connectionObj = {
-			username: process.env['REDIS_USERNAME'] || redisConfig.USERNAME,
-			password: process.env['REDIS_PASSWORD'] || redisConfig.PASSWORD,
+			username: redisConfig.USERNAME,
+			password: redisConfig.PASSWORD,
 			socket: {
-				host: process.env['REDIS_HOST'] || redisConfig.HOST,
-				port: parseInt(process.env['REDIS_PORT']) || redisConfig.PORT,
+				host: redisConfig.HOST,
+				port: redisConfig.PORT,
 				tls: redisConfig.TLS,
-				servername: process.env['REDIS_HOST'] || redisConfig.HOST,
+				servername: redisConfig.HOST,
 			}
 		}
 
