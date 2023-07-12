@@ -194,6 +194,7 @@ declare namespace RedisData {
 		SCORES = 'scores',
 		MAX_ARMY_ON_TILE = 'maxArmyOnTile',
 		MOVE_COUNT = 'moveCount',
+		REPLAYS = 'replays',
 	}
 }
 
