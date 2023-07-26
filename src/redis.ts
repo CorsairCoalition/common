@@ -4,8 +4,8 @@ import EventEmitter from 'node:events'
 
 export default class Redis {
 
-	private static publisher: RedisClientType
-	private static subscriber: RedisClientType
+	public static publisher: RedisClientType
+	public static subscriber: RedisClientType
 	private static EXPIRATION_TIME: number
 	public static readonly connectionEventEmitter = new EventEmitter()
 
