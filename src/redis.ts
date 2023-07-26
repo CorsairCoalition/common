@@ -62,6 +62,7 @@ export default class Redis {
 	}
 
 	public static async listPush(keyspace: string, list: RedisData.LIST, data: any) {
+		Log.debug ('[Redis] listPush: ', keyspace + '-' + list)
 		return Promise.all([
 			Redis.publisher.rPush(keyspace + '-' + list, JSON.stringify(data)),
 			Redis.publisher.expire(keyspace + '-' + list, Redis.EXPIRATION_TIME)
@@ -69,6 +70,7 @@ export default class Redis {
 	}
 
 	public static async setKeys(keyspace: string, keyValues: Record<string, any>) {
+		Log.debug ('[Redis] setKeys: ', keyspace)
 		// JSON.stringify each value
 		for (let key in keyValues) {
 			keyValues[key] = JSON.stringify(keyValues[key])
@@ -99,6 +101,7 @@ export default class Redis {
 
 	public static publish(botId: string, channel: RedisData.CHANNEL, data: any) {
 		const CHANNEL_NAME: string = `${botId}-${channel}`
+		Log.debug ('[Redis] publish: ', CHANNEL_NAME)
 		return Redis.publisher.publish(CHANNEL_NAME, JSON.stringify(data))
 	}
 
