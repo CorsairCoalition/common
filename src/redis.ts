@@ -1,6 +1,7 @@
 import { createClient, RedisClientType } from '@redis/client'
 import Log from './log.js'
 import EventEmitter from 'node:events'
+import { later } from './utils.js'
 
 export default class Redis {
 
@@ -36,13 +37,31 @@ export default class Redis {
 				port: redisConfig.PORT,
 				tls: redisConfig.TLS,
 				servername: redisConfig.HOST,
+				reconnectStrategy: (retries: number) => {
+					if(retries > 5) {
+						return false
+					}
+					// reconnect after 50ms, 150ms, 250ms, 350ms...
+					return 50 + 100 * (retries - 1)
+				}
 			}
+		}
+
+		const handleConnectionError = (error: Error) => {
+			Log.stderr(`[Redis] ${error}`)
+			// if connection error is not resolved within 1 second, quit
+			later(1000).then(() => {
+				if(!(Redis.subscriber.isReady && Redis.publisher.isReady)) {
+					Log.stderr('[Redis] Connection issues still unresolved. Quitting.')
+					process.exit(3)
+				}
+			})
 		}
 
 		Redis.subscriber = createClient(connectionObj)
 		Redis.publisher = createClient(connectionObj)
-		Redis.subscriber.on('error', (error: Error) => Log.stderr(`[Redis] ${error}`))
-		Redis.publisher.on('error', (error: Error) => Log.stderr(`[Redis] ${error}`))
+		Redis.subscriber.on('error', handleConnectionError)
+		Redis.publisher.on('error', handleConnectionError)
 
 		let redisConnectionEvents = ['connect', 'ready', 'reconnecting', 'end', 'error']
 		for (let event of redisConnectionEvents) {
