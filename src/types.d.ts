@@ -201,7 +201,7 @@ declare namespace RedisData {
 declare namespace Config {
 	interface Game {
 		GAME_SERVER_URL: string
-		REPLAY_URL_PREFIX: string
+		GAME_WEBAPP_URL: string
 		MAX_TURNS: number
 		BOT_ID_PREFIX: string
 		userId: string
