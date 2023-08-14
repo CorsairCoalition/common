@@ -29,6 +29,8 @@ export default class Redis {
 			redisConfig.TLS = process.env['REDIS_TLS'] === "1" || process.env['REDIS_TLS'] === "true"
 		}
 
+		Log.debugObject('Redis config:', redisConfig)
+
 		const connectionObj = {
 			username: redisConfig.USERNAME,
 			password: redisConfig.PASSWORD,
@@ -38,7 +40,7 @@ export default class Redis {
 				tls: redisConfig.TLS,
 				servername: redisConfig.HOST,
 				reconnectStrategy: (retries: number) => {
-					if(retries > 5) {
+					if (retries > 5) {
 						return false
 					}
 					// reconnect after 50ms, 150ms, 250ms, 350ms...
@@ -50,10 +52,13 @@ export default class Redis {
 		const handleConnectionError = (error: Error) => {
 			Log.stderr(`[Redis] ${error}`)
 			// if connection error is not resolved within 1 second, quit
+			Log.debug('[Redis] Checking connection status in 1 second...')
 			later(1000).then(() => {
-				if(!(Redis.subscriber.isReady && Redis.publisher.isReady)) {
+				if (!(Redis.subscriber.isReady && Redis.publisher.isReady)) {
 					Log.stderr('[Redis] Connection issues still unresolved. Quitting.')
 					process.exit(3)
+				} else {
+					Log.debug('[Redis] Connection issues resolved. Moving on.')
 				}
 			})
 		}
@@ -68,6 +73,10 @@ export default class Redis {
 			Redis.subscriber.on(event, Redis.redisEventHandler(event))
 		}
 
+		Redis.connectionEventEmitter.on('status', (type: string, data: any) => {
+			Log.debug('[Redis]', type, data)
+		})
+
 		return Promise.all([
 			Redis.subscriber.connect(),
 			Redis.publisher.connect()
@@ -77,11 +86,15 @@ export default class Redis {
 	private static redisEventHandler = (type: string) => (data: any) => Redis.connectionEventEmitter.emit('status', type, data)
 
 	public static async ping() {
-		await Redis.publisher.ping()
+		Log.debug('[Redis] sending PING...')
+		return Redis.publisher.ping().then((response: string) => {
+			Log.debug('[Redis] received:', response)
+			return response
+		})
 	}
 
 	public static async listPush(keyspace: string, list: RedisData.LIST, data: any) {
-		Log.debug ('[Redis] listPush: ', keyspace + '-' + list)
+		Log.debug('[Redis] listPush: ', keyspace + '-' + list)
 		return Promise.all([
 			Redis.publisher.rPush(keyspace + '-' + list, JSON.stringify(data)),
 			Redis.publisher.expire(keyspace + '-' + list, Redis.EXPIRATION_TIME)
@@ -89,7 +102,7 @@ export default class Redis {
 	}
 
 	public static async setKeys(keyspace: string, keyValues: Record<string, any>) {
-		Log.debug ('[Redis] setKeys: ', keyspace)
+		Log.debug('[Redis] setKeys: ', keyspace)
 		// JSON.stringify each value
 		for (let key in keyValues) {
 			keyValues[key] = JSON.stringify(keyValues[key])
@@ -101,6 +114,7 @@ export default class Redis {
 	}
 
 	public static async getKeys(keyspace: string, ...keys: Array<string>) {
+		Log.debug('[Redis] getKeys: ', keyspace)
 		// JSON.parse each value
 		let values = await Redis.publisher.hmGet(keyspace, keys)
 		for (let key in values) {
@@ -110,6 +124,7 @@ export default class Redis {
 	}
 
 	public static async getAllKeys(keyspace: string) {
+		Log.debug('[Redis] getAllKeys: ', keyspace)
 		// JSON.parse each value
 		let values = await Redis.publisher.hGetAll(keyspace)
 		for (let key in values) {
@@ -120,7 +135,7 @@ export default class Redis {
 
 	public static publish(botId: string, channel: RedisData.CHANNEL, data: any) {
 		const CHANNEL_NAME: string = `${botId}-${channel}`
-		Log.debug ('[Redis] publish: ', CHANNEL_NAME)
+		Log.debug('[Redis] publish: ', CHANNEL_NAME)
 		return Redis.publisher.publish(CHANNEL_NAME, JSON.stringify(data))
 	}
 
@@ -144,6 +159,7 @@ export default class Redis {
 
 	public static async quit() {
 		let promises = []
+		Log.debug('[Redis] Closing Redis connections...')
 		if (Redis.subscriber.isReady) {
 			Log.stdout('Closing Redis subscriber...')
 			promises.push(Redis.subscriber.quit())
